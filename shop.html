@@ -71,16 +71,13 @@
 							aria-haspopup="true" aria-expanded="false">Shop</a>
 						<div class="dropdown-menu" aria-labelledby="dropdown04">
 							<a class="dropdown-item" href="shop.html">Shop</a>
-							<a class="dropdown-item" href="wishlist.html">Wishlist</a>
-							<a class="dropdown-item" href="product-single.html">Single Product</a>
 							<a class="dropdown-item" href="cart.html">Cart</a>
 							<a class="dropdown-item" href="checkout.html">Checkout</a>
 						</div>
 					</li>
 					<li class="nav-item"><a href="about.html" class="nav-link">About</a></li>
-					<li class="nav-item"><a href="blog.html" class="nav-link">Blog</a></li>
 					<li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>
-					<li class="nav-item cta cta-colored"><a href="cart.html" class="nav-link"><span
+					<li class="nav-item cta cta-colored"><a id="cart-count" href="cart.html" class="nav-link"><span
 								class="icon-shopping_cart"></span>[0]</a></li>
 
 				</ul>
@@ -241,15 +238,53 @@
 		crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	</script>
 	<script>
+		var cart = localStorage.getItem("cart") ? JSON.parse(localStorage.getItem("cart")) : [];
+		document.getElementById("cart-count").innerHTML = '<span class="icon-shopping_cart"></span>' +
+															'[' + cart.length + ']';
 		function getUrlParameter(name) {
 			name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
 			var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
 			var results = regex.exec(location.search);
 			return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
 		};
+		function addToCart(productId, quantity) {
+			var cart = localStorage.getItem("cart") ? JSON.parse(localStorage.getItem("cart")) : [];
+			if (cart.length === 0) {
+				cart.push({
+					productsResquest: {
+						productID: productId
+					},
+					quantity: 1
+				});
+			} else {
+				var getProduct = false;
+				for (let index = 0; index < cart.length; index++) {
+					const element = cart[index];
+					if (element.productsResquest.productID === productId) {
+						getProduct = true;
+						cart[index] = {
+							productsResquest: {
+								productID: productId
+							},
+							quantity: element.quantity + 1
+						};
+					}
+				}
+				if (getProduct === false) {
+					cart.push({
+						productsResquest : {
+							productID : productId
+						},
+						quantity : 1
+					})
+				}
+			}
+			localStorage.setItem("cart", JSON.stringify(cart));
+			document.getElementById("cart-count").innerHTML = '<span class="icon-shopping_cart"></span>' +
+															'[' + cart.length + ']';
+		};
 		$(function () {
 			var categoryId = getUrlParameter("category");
-			console.log(categoryId);
 			//Gửi yêu cầu HTTP tới máy chủ để lấy danh sách
 			$.ajax({
 				url: "http://localhost:8080/category",
@@ -301,7 +336,7 @@
 								'<a href="#" class="add-to-cart d-flex justify-content-center align-items-center text-center">' +
 								'<span><i class="ion-ios-menu"></i></span>' +
 								'</a>' +
-								'<a href="#" class="buy-now d-flex justify-content-center align-items-center mx-1">' +
+								'<a href="#" onclick="addToCart(' + product.productID + ')" class="buy-now d-flex justify-content-center align-items-center mx-1">' +
 								'<span><i class="ion-ios-cart"></i></span>' +
 								'</a>' +
 								'</div>' +
@@ -319,46 +354,46 @@
 				});
 			} else {
 				$.ajax({
-				url: "http://localhost:8080/product/api/v1/get-by-category/" + categoryId,
-				method: "GET",
-				success: function (data) {
-					//Hiển thị danh sách
-					var products = "";
-					$.each(data.data, function (index, product) {
-						products += 
-						'<div class="col-md-6 col-lg-3">' + 
-							'<div class="product">' + 
-								'<a href="#" class="img-prod"><img class="img-fluid" src="' + product.imageURL + '" alt="Colorlib Template">' + 
-									'<div class="overlay"></div>' + 
-								'</a>' + 
+					url: "http://localhost:8080/product/api/v1/get-by-category/" + categoryId,
+					method: "GET",
+					success: function (data) {
+						//Hiển thị danh sách
+						var products = "";
+						$.each(data.data, function (index, product) {
+							products +=
+								'<div class="col-md-6 col-lg-3">' +
+								'<div class="product">' +
+								'<a href="#" class="img-prod"><img class="img-fluid" src="' + product.imageURL + '" alt="Colorlib Template">' +
+								'<div class="overlay"></div>' +
+								'</a>' +
 								'<div class="text py-3 pb-4 px-3 text-center">' +
-									'<h3><a href="#">' + product.name + '</a></h3>' + 
-									'<div class="d-flex">' + 
-										'<div class="pricing">' + 
-											'<p class="price"><span class="price-sale">$' + product.price + '</span></p>' + 
-										'</div>' + 
-									'</div>' + 
-									'<div class="bottom-area d-flex px-3">' + 
-										'<div class="m-auto d-flex">' + 
-											'<a href="#" class="add-to-cart d-flex justify-content-center align-items-center text-center">' + 
-												'<span><i class="ion-ios-menu"></i></span>' + 
-											'</a>' + 
-											'<a href="#" class="buy-now d-flex justify-content-center align-items-center mx-1">' + 
-												'<span><i class="ion-ios-cart"></i></span>' + 
-											'</a>' + 
-										'</div>' + 
-									'</div>' + 
-								'</div>' + 
-							'</div>' + 
-						'</div>';
-					});
-					document.getElementById("products").innerHTML = products;
-				},
-				error: function (error) {
-					//Xử lí lỗi nếu có
-					console.log(error);
-				}
-			});
+								'<h3><a href="#">' + product.name + '</a></h3>' +
+								'<div class="d-flex">' +
+								'<div class="pricing">' +
+								'<p class="price"><span class="price-sale">$' + product.price + '</span></p>' +
+								'</div>' +
+								'</div>' +
+								'<div class="bottom-area d-flex px-3">' +
+								'<div class="m-auto d-flex">' +
+								'<a href="#" class="add-to-cart d-flex justify-content-center align-items-center text-center">' +
+								'<span><i class="ion-ios-menu"></i></span>' +
+								'</a>' +
+								'<a href="#" onclick="addToCart(' + product.productID + ')" class="buy-now d-flex justify-content-center align-items-center mx-1">' +
+								'<span><i class="ion-ios-cart"></i></span>' +
+								'</a>' +
+								'</div>' +
+								'</div>' +
+								'</div>' +
+								'</div>' +
+								'</div>';
+						});
+						document.getElementById("products").innerHTML = products;
+					},
+					error: function (error) {
+						//Xử lí lỗi nếu có
+						console.log(error);
+					}
+				});
 			}
 		});
 	</script>

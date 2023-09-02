@@ -71,16 +71,13 @@
 							aria-haspopup="true" aria-expanded="false">Shop</a>
 						<div class="dropdown-menu" aria-labelledby="dropdown04">
 							<a class="dropdown-item" href="shop.html">Shop</a>
-							<a class="dropdown-item" href="wishlist.html">Wishlist</a>
-							<a class="dropdown-item" href="product-single.html">Single Product</a>
 							<a class="dropdown-item" href="cart.html">Cart</a>
 							<a class="dropdown-item" href="checkout.html">Checkout</a>
 						</div>
 					</li>
 					<li class="nav-item"><a href="about.html" class="nav-link">About</a></li>
-					<li class="nav-item"><a href="blog.html" class="nav-link">Blog</a></li>
 					<li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>
-					<li class="nav-item cta cta-colored"><a href="cart.html" class="nav-link"><span
+					<li class="nav-item cta cta-colored"><a id="cart-count" href="cart.html" class="nav-link"><span
 								class="icon-shopping_cart"></span>[0]</a></li>
 
 				</ul>
@@ -185,7 +182,7 @@
 								<div class="text text-center">
 									<h2>Vegetables</h2>
 									<p>Protect the health of every home</p>
-									<p><a href="#" class="btn btn-primary">Shop now</a></p>
+									<p><a href="shop.html" class="btn btn-primary">Shop now</a></p>
 								</div>
 							</div>
 						</div>
@@ -754,6 +751,11 @@
 		src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&sensor=false"></script>
 	<script src="js/google-map.js"></script>
 	<script src="js/main.js"></script>
+	<script>
+		var cart = localStorage.getItem("cart") ? JSON.parse(localStorage.getItem("cart")) : [];
+		document.getElementById("cart-count").innerHTML = '<span class="icon-shopping_cart"></span>' +
+															'[' + cart.length + ']';
+	</script>
 
 </body>
 
